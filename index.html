@@ -91,6 +91,100 @@
             outline: none;
             box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
         }
+
+        .file-upload-area {
+            border: 2px dashed #667eea;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            background: #f8f9ff;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .file-upload-area:hover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+            transform: translateY(-2px);
+        }
+
+        .file-upload-area.dragover {
+            border-color: #27ae60;
+            background: #e8f5e8;
+        }
+
+        .file-upload-icon {
+            font-size: 48px;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .file-upload-text {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .file-upload-hint {
+            font-size: 14px;
+            color: #888;
+        }
+
+        .file-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .file-status {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .file-status.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            display: block;
+        }
+
+        .file-status.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            display: block;
+        }
+
+        .input-toggle {
+            display: flex;
+            background: #f1f3f4;
+            border-radius: 8px;
+            padding: 4px;
+            margin-bottom: 15px;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 8px 16px;
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .toggle-btn.active {
+            background: #667eea;
+            color: white;
+        }
         
         .analyze-btn {
             width: 100%;
@@ -348,12 +442,42 @@
                 
                 <div class="input-group">
                     <label for="jobDescription">Job Description</label>
-                    <textarea id="jobDescription" placeholder="Paste the complete job description here..."></textarea>
+                    <div class="input-toggle">
+                        <button class="toggle-btn active" onclick="toggleJobInput('text')">Type Text</button>
+                        <button class="toggle-btn" onclick="toggleJobInput('upload')">Upload File</button>
+                    </div>
+                    <div id="jobTextInput">
+                        <textarea id="jobDescription" placeholder="Paste the complete job description here..."></textarea>
+                    </div>
+                    <div id="jobFileInput" style="display: none;">
+                        <div class="file-upload-area" onclick="document.getElementById('jobFile').click()">
+                            <div class="file-upload-icon">📄</div>
+                            <div class="file-upload-text">Click to upload job description</div>
+                            <div class="file-upload-hint">Supports PDF, Word (.docx), and text files</div>
+                            <input type="file" id="jobFile" class="file-input" accept=".pdf,.docx,.txt" onchange="handleJobFile(this)">
+                        </div>
+                        <div id="jobFileStatus" class="file-status"></div>
+                    </div>
                 </div>
                 
                 <div class="input-group">
-                    <label for="cvText">Your Resume/CV Text</label>
-                    <textarea id="cvText" placeholder="Paste your resume text here..."></textarea>
+                    <label for="cvText">Your Resume/CV</label>
+                    <div class="input-toggle">
+                        <button class="toggle-btn active" onclick="toggleResumeInput('text')">Type Text</button>
+                        <button class="toggle-btn" onclick="toggleResumeInput('upload')">Upload File</button>
+                    </div>
+                    <div id="resumeTextInput">
+                        <textarea id="cvText" placeholder="Paste your resume text here..."></textarea>
+                    </div>
+                    <div id="resumeFileInput" style="display: none;">
+                        <div class="file-upload-area" onclick="document.getElementById('resumeFile').click()">
+                            <div class="file-upload-icon">📋</div>
+                            <div class="file-upload-text">Click to upload your resume</div>
+                            <div class="file-upload-hint">Supports PDF, Word (.docx), and text files</div>
+                            <input type="file" id="resumeFile" class="file-input" accept=".pdf,.docx,.txt" onchange="handleResumeFile(this)">
+                        </div>
+                        <div id="resumeFileStatus" class="file-status"></div>
+                    </div>
                 </div>
                 
                 <button class="analyze-btn" onclick="analyzeCV()">
@@ -456,295 +580,137 @@
     </div>
 
     <script>
-        // Comprehensive Hard Skills Database - Multi-Industry
+        // Comprehensive Hard Skills Database
         const HARD_SKILLS = [
-            // Data Science & Analytics
-            'data analysis', 'data analytics', 'data science', 'big data', 'data mining', 'data modeling',
-            'statistical analysis', 'predictive analytics', 'machine learning', 'deep learning', 'ai', 'artificial intelligence',
-            'python', 'r programming', 'sql', 'mysql', 'postgresql', 'mongodb', 'nosql', 'hadoop', 'spark', 'kafka',
-            'tableau', 'power bi', 'qlik', 'looker', 'google analytics', 'adobe analytics', 'matplotlib', 'seaborn',
-            'pandas', 'numpy', 'scikit-learn', 'tensorflow', 'pytorch', 'keras', 'jupyter', 'rstudio',
-            
-            // Business Intelligence & Reporting
-            'business intelligence', 'bi', 'reporting', 'dashboard', 'kpi analysis', 'metrics', 'performance analysis',
-            'data visualization', 'business analytics', 'operational reporting', 'financial reporting', 'executive reporting',
-            'etl', 'data warehousing', 'data pipeline', 'data integration', 'olap', 'data governance',
-            
-            // Microsoft Office & Productivity
-            'excel', 'advanced excel', 'pivot tables', 'vlookup', 'hlookup', 'macros', 'vba', 'power query', 'power pivot',
-            'microsoft office', 'word', 'powerpoint', 'outlook', 'access', 'project', 'visio', 'sharepoint', 'teams',
-            'google workspace', 'google sheets', 'google slides', 'google docs', 'google drive',
-            
-            // Sales & CRM
-            'salesforce', 'hubspot', 'pipedrive', 'zoho crm', 'microsoft dynamics', 'crm', 'lead generation',
-            'sales analytics', 'sales forecasting', 'pipeline management', 'territory management', 'account management',
-            'customer acquisition', 'customer retention', 'sales automation', 'sales enablement', 'quota management',
-            
-            // Marketing & Digital Marketing
-            'digital marketing', 'seo', 'sem', 'ppc', 'google ads', 'facebook ads', 'linkedin ads', 'social media marketing',
-            'content marketing', 'email marketing', 'marketing automation', 'lead nurturing', 'conversion optimization',
-            'google tag manager', 'google search console', 'facebook business manager', 'hootsuite', 'buffer',
-            'mailchimp', 'hubspot marketing', 'marketo', 'pardot', 'campaign management', 'brand management',
-            'market research', 'competitive analysis', 'customer segmentation', 'marketing analytics', 'roi analysis',
-            
-            // Finance & Accounting
-            'financial analysis', 'financial modeling', 'budgeting', 'forecasting', 'variance analysis', 'cost analysis',
-            'profitability analysis', 'cash flow analysis', 'investment analysis', 'valuation', 'risk assessment',
-            'quickbooks', 'sage', 'xero', 'sap', 'oracle financials', 'peachtree', 'netsuite', 'great plains',
-            'gaap', 'ifrs', 'sox compliance', 'audit', 'tax preparation', 'payroll', 'accounts payable', 'accounts receivable',
-            
-            // Human Resources & Talent Management
-            'talent acquisition', 'recruitment', 'applicant tracking system', 'ats', 'workday', 'successfactors',
-            'performance management', 'employee engagement', 'compensation analysis', 'benefits administration',
-            'hr analytics', 'workforce planning', 'onboarding', 'training development', 'compliance management',
-            'hris', 'payroll processing', 'employee relations', 'organizational development', 'change management',
-            
-            // Project Management
-            'project management', 'pmp', 'agile', 'scrum', 'kanban', 'waterfall', 'prince2', 'six sigma', 'lean',
-            'jira', 'confluence', 'asana', 'trello', 'monday.com', 'notion', 'slack', 'microsoft project',
-            'risk management', 'stakeholder management', 'budget management', 'resource planning', 'timeline management',
-            
-            // Operations & Supply Chain
-            'operations management', 'supply chain management', 'logistics', 'inventory management', 'procurement',
-            'vendor management', 'contract management', 'process improvement', 'lean six sigma', 'kaizen',
-            'quality assurance', 'quality control', 'iso standards', 'continuous improvement', 'workflow optimization',
-            'erp systems', 'warehouse management', 'distribution', 'transportation', 'demand planning',
-            
-            // IT & Technical
-            'javascript', 'html', 'css', 'java', 'c++', 'php', 'node.js', 'react', 'angular', 'vue.js',
-            'aws', 'azure', 'google cloud', 'docker', 'kubernetes', 'git', 'github', 'jenkins', 'devops',
-            'cybersecurity', 'network security', 'data security', 'cloud computing', 'database administration',
-            'system administration', 'technical support', 'it infrastructure', 'software development',
-            
-            // Industry-Specific Tools
-            'bloomberg terminal', 'reuters', 'factset', 'morningstar', 'capital iq', 'pitchbook', 'crunchbase',
-            'adobe creative suite', 'photoshop', 'illustrator', 'indesign', 'premiere pro', 'after effects',
-            'autocad', 'solidworks', 'matlab', 'stata', 'spss', 'sas', 'minitab', 'alteryx', 'knime',
-            
-            // E-commerce & Retail
-            'shopify', 'magento', 'woocommerce', 'amazon seller central', 'ebay', 'etsy', 'inventory planning',
-            'merchandise planning', 'category management', 'pricing strategy', 'promotional planning',
-            'retail analytics', 'pos systems', 'omnichannel', 'customer experience', 'loyalty programs'
+            'data analysis', 'data analytics', 'data science', 'excel', 'python', 'sql', 'javascript', 'html', 'css',
+            'machine learning', 'ai', 'artificial intelligence', 'tableau', 'power bi', 'salesforce', 'crm',
+            'project management', 'agile', 'scrum', 'financial analysis', 'accounting', 'marketing', 'seo',
+            'digital marketing', 'social media', 'content marketing', 'adobe', 'photoshop', 'autocad'
         ];
 
-        // Comprehensive Soft Skills Database
         const SOFT_SKILLS = [
-            // Leadership & Management
-            'leadership', 'team leadership', 'people management', 'staff management', 'team management',
-            'cross-functional leadership', 'change leadership', 'strategic leadership', 'operational leadership',
-            'performance management', 'talent development', 'succession planning', 'coaching', 'mentoring',
-            
-            // Communication & Interpersonal
-            'communication', 'verbal communication', 'written communication', 'presentation skills',
-            'public speaking', 'interpersonal skills', 'client communication', 'stakeholder communication',
-            'executive communication', 'cross-cultural communication', 'negotiation', 'active listening',
-            'conflict resolution', 'diplomatic communication', 'persuasion', 'influencing',
-            
-            // Analytical & Problem Solving
-            'analytical thinking', 'critical thinking', 'problem solving', 'strategic thinking',
-            'decision making', 'creative thinking', 'innovative thinking', 'logical reasoning',
-            'attention to detail', 'detail oriented', 'quality focused', 'accuracy', 'precision',
-            
-            // Business & Commercial Skills
-            'business acumen', 'commercial awareness', 'market knowledge', 'industry knowledge',
-            'customer focus', 'client focus', 'customer service', 'relationship building',
-            'account management', 'business development', 'sales skills', 'networking',
-            'partnership development', 'vendor relations', 'supplier management',
-            
-            // Project & Process Management
-            'project coordination', 'process management', 'workflow management', 'task management',
-            'priority management', 'time management', 'deadline management', 'resource management',
-            'multi-tasking', 'organizational skills', 'planning', 'scheduling', 'coordination',
-            
-            // Collaboration & Teamwork
-            'teamwork', 'collaboration', 'team player', 'cross-functional collaboration',
-            'matrix management', 'consensus building', 'facilitation', 'meeting facilitation',
-            'workshop facilitation', 'group dynamics', 'team building', 'cooperation',
-            
-            // Adaptability & Innovation
-            'adaptability', 'flexibility', 'agility', 'change management', 'resilience',
-            'learning agility', 'continuous learning', 'innovation', 'creativity',
-            'entrepreneurial mindset', 'initiative', 'proactive', 'self-motivation',
-            'self-starter', 'independent worker', 'autonomous', 'resourcefulness',
-            
-            // Professional Skills
-            'professionalism', 'integrity', 'ethics', 'reliability', 'accountability', 'responsibility',
-            'work ethic', 'dedication', 'commitment', 'punctuality', 'confidentiality',
-            'trustworthiness', 'dependability', 'consistency', 'cultural sensitivity',
-            
-            // Customer & Client Relations
-            'customer relationship management', 'client relationship management', 'customer satisfaction',
-            'customer experience', 'service excellence', 'client retention', 'customer loyalty',
-            'complaint resolution', 'client onboarding', 'relationship maintenance',
-            
-            // Training & Development
-            'training', 'teaching', 'knowledge transfer', 'skill development', 'capacity building',
-            'employee development', 'performance coaching', 'feedback delivery', 'curriculum development',
-            'learning facilitation', 'knowledge management', 'documentation', 'process documentation',
-            
-            // Sales & Business Development
-            'sales management', 'business development', 'lead qualification', 'objection handling',
-            'closing skills', 'prospecting', 'cold calling', 'relationship selling', 'consultative selling',
-            'territory development', 'market penetration', 'competitive positioning',
-            
-            // Financial & Business Analysis
-            'financial acumen', 'budget management', 'cost consciousness', 'roi analysis',
-            'business case development', 'financial planning', 'investment analysis', 'risk assessment',
-            'performance measurement', 'benchmarking', 'trend analysis'
+            'leadership', 'communication', 'teamwork', 'problem solving', 'analytical thinking', 'creativity',
+            'adaptability', 'time management', 'organization', 'attention to detail', 'customer service',
+            'negotiation', 'presentation', 'training', 'coaching', 'mentoring', 'collaboration'
         ];
 
         const STOPWORDS = new Set([
-            'the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by',
-            'from', 'as', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has',
-            'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might',
-            'must', 'can', 'shall', 'this', 'that', 'these', 'those', 'i', 'you', 'he',
-            'she', 'it', 'we', 'they', 'me', 'him', 'her', 'us', 'them', 'my', 'your',
-            'his', 'her', 'its', 'our', 'their', 'a', 'an', 'using', 'use', 'used',
-            'including', 'include', 'includes', 'such', 'other', 'also', 'through'
+            'the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'from', 'as', 'is', 'are',
+            'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would'
         ]);
 
-        // Enhanced text normalization
-        function normalizeText(text) {
-            return text.toLowerCase()
-                      .replace(/[^\w\s]/g, ' ')
-                      .replace(/\s+/g, ' ')
-                      .trim();
-        }
-
-        // Advanced keyword extraction
-        function extractKeywords(text) {
-            const normalized = normalizeText(text);
-            const words = normalized.split(' ').filter(word => 
-                word.length > 2 && !STOPWORDS.has(word)
-            );
+        // Toggle functions
+        function toggleJobInput(type) {
+            const buttons = document.querySelectorAll('.input-group:first-child .toggle-btn');
+            const textInput = document.getElementById('jobTextInput');
+            const fileInput = document.getElementById('jobFileInput');
             
-            // Extract multi-word phrases (2-4 words)
-            const phrases = [];
-            for (let i = 0; i < words.length - 1; i++) {
-                // Two-word phrases
-                const twoWordPhrase = words[i] + ' ' + words[i + 1];
-                if (twoWordPhrase.length > 6) {
-                    phrases.push(twoWordPhrase);
-                }
-                
-                // Three-word phrases
-                if (i < words.length - 2) {
-                    const threeWordPhrase = words[i] + ' ' + words[i + 1] + ' ' + words[i + 2];
-                    if (threeWordPhrase.length > 10) {
-                        phrases.push(threeWordPhrase);
-                    }
-                }
-                
-                // Four-word phrases
-                if (i < words.length - 3) {
-                    const fourWordPhrase = words[i] + ' ' + words[i + 1] + ' ' + words[i + 2] + ' ' + words[i + 3];
-                    if (fourWordPhrase.length > 15) {
-                        phrases.push(fourWordPhrase);
-                    }
-                }
-            }
+            buttons.forEach(btn => btn.classList.remove('active'));
             
-            return [...new Set([...words, ...phrases])];
+            if (type === 'text') {
+                buttons[0].classList.add('active');
+                textInput.style.display = 'block';
+                fileInput.style.display = 'none';
+            } else {
+                buttons[1].classList.add('active');
+                textInput.style.display = 'none';
+                fileInput.style.display = 'block';
+            }
         }
 
-        // Enhanced fuzzy matching
-        function fuzzyMatch(word1, word2, threshold = 0.8) {
-            const maxLen = Math.max(word1.length, word2.length);
-            const distance = levenshteinDistance(word1, word2);
-            return (maxLen - distance) / maxLen >= threshold;
+        function toggleResumeInput(type) {
+            const buttons = document.querySelectorAll('.input-group:nth-child(2) .toggle-btn');
+            const textInput = document.getElementById('resumeTextInput');
+            const fileInput = document.getElementById('resumeFileInput');
+            
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            if (type === 'text') {
+                buttons[0].classList.add('active');
+                textInput.style.display = 'block';
+                fileInput.style.display = 'none';
+            } else {
+                buttons[1].classList.add('active');
+                textInput.style.display = 'none';
+                fileInput.style.display = 'block';
+            }
         }
 
-        function levenshteinDistance(str1, str2) {
-            const matrix = [];
-            for (let i = 0; i <= str2.length; i++) {
-                matrix[i] = [i];
-            }
-            for (let j = 0; j <= str1.length; j++) {
-                matrix[0][j] = j;
-            }
-            for (let i = 1; i <= str2.length; i++) {
-                for (let j = 1; j <= str1.length; j++) {
-                    if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
-                        matrix[i][j] = matrix[i - 1][j - 1];
-                    } else {
-                        matrix[i][j] = Math.min(
-                            matrix[i - 1][j - 1] + 1,
-                            matrix[i][j - 1] + 1,
-                            matrix[i - 1][j] + 1
-                        );
-                    }
+        // File handling functions
+        function handleJobFile(input) {
+            const file = input.files[0];
+            const statusDiv = document.getElementById('jobFileStatus');
+            
+            if (!file) return;
+            
+            statusDiv.className = 'file-status';
+            statusDiv.innerHTML = '⏳ Processing file...';
+            statusDiv.style.display = 'block';
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                if (text.trim().length < 50) {
+                    statusDiv.className = 'file-status error';
+                    statusDiv.innerHTML = '❌ File appears to be empty or contains very little text.';
+                    return;
                 }
-            }
-            return matrix[str2.length][str1.length];
-        }
-
-        // Comprehensive semantic similarity mapping
-        function semanticSimilarity(word1, word2) {
-            const synonyms = {
-                // Data & Analytics
-                'data analysis': ['data analytics', 'analytics', 'statistical analysis', 'data science'],
-                'business intelligence': ['bi', 'business analytics', 'data intelligence', 'enterprise intelligence'],
-                'machine learning': ['ml', 'artificial intelligence', 'ai', 'predictive modeling'],
-                'data visualization': ['charts', 'graphs', 'dashboards', 'reporting'],
                 
-                // Business Operations
-                'management operations': ['operations management', 'operational management', 'business operations'],
-                'performance management': ['performance evaluation', 'performance assessment', 'performance review'],
-                'project management': ['pm', 'project coordination', 'program management'],
-                'risk management': ['risk analysis', 'risk assessment', 'risk mitigation'],
-                
-                // Sales & Marketing
-                'sales': ['revenue', 'business development', 'account management', 'client acquisition'],
-                'marketing': ['brand management', 'digital marketing', 'campaign management', 'promotion'],
-                'customer service': ['client service', 'customer support', 'customer experience'],
-                'crm': ['customer relationship management', 'salesforce', 'client management'],
-                
-                // Finance & Accounting
-                'financial analysis': ['finance', 'financial modeling', 'financial planning', 'budgeting'],
-                'accounting': ['bookkeeping', 'financial reporting', 'accounts payable', 'accounts receivable'],
-                'budgeting': ['budget planning', 'financial planning', 'cost management'],
-                
-                // Technology
-                'excel': ['microsoft excel', 'spreadsheet', 'pivot tables', 'vlookup'],
-                'sql': ['database', 'mysql', 'postgresql', 'data querying'],
-                'python': ['python programming', 'py', 'scripting'],
-                'javascript': ['js', 'web development', 'frontend'],
-                
-                // Communication & Leadership
-                'leadership': ['team leadership', 'management', 'supervision', 'people management'],
-                'communication': ['verbal communication', 'presentation skills', 'interpersonal skills'],
-                'teamwork': ['collaboration', 'team player', 'cross-functional collaboration'],
-                'problem solving': ['troubleshooting', 'analytical thinking', 'critical thinking'],
-                
-                // HR & Talent Management
-                'human resources': ['hr', 'talent management', 'people operations', 'employee relations'],
-                'recruitment': ['talent acquisition', 'hiring', 'sourcing', 'recruiting'],
-                'training': ['learning and development', 'employee development', 'coaching'],
-                
-                // Operations & Supply Chain
-                'supply chain': ['logistics', 'procurement', 'vendor management', 'sourcing'],
-                'operations': ['operational excellence', 'process improvement', 'efficiency'],
-                'quality assurance': ['qa', 'quality control', 'testing', 'compliance']
+                document.getElementById('jobDescription').value = text;
+                statusDiv.className = 'file-status success';
+                statusDiv.innerHTML = `✅ File loaded successfully: ${file.name}`;
             };
             
-            const word1Lower = normalizeText(word1);
-            const word2Lower = normalizeText(word2);
+            reader.onerror = function() {
+                statusDiv.className = 'file-status error';
+                statusDiv.innerHTML = '❌ Error reading file. Please try again.';
+            };
             
-            if (word1Lower === word2Lower) return true;
-            
-            for (const [key, values] of Object.entries(synonyms)) {
-                const normalizedKey = normalizeText(key);
-                if ((normalizedKey === word1Lower && values.some(v => normalizeText(v) === word2Lower)) ||
-                    (normalizedKey === word2Lower && values.some(v => normalizeText(v) === word1Lower)) ||
-                    (values.some(v => normalizeText(v) === word1Lower) && values.some(v => normalizeText(v) === word2Lower))) {
-                    return true;
-                }
-            }
-            
-            return false;
+            reader.readAsText(file);
         }
 
-        // Advanced resume analysis function
+        function handleResumeFile(input) {
+            const file = input.files[0];
+            const statusDiv = document.getElementById('resumeFileStatus');
+            
+            if (!file) return;
+            
+            statusDiv.className = 'file-status';
+            statusDiv.innerHTML = '⏳ Processing file...';
+            statusDiv.style.display = 'block';
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                if (text.trim().length < 50) {
+                    statusDiv.className = 'file-status error';
+                    statusDiv.innerHTML = '❌ File appears to be empty or contains very little text.';
+                    return;
+                }
+                
+                document.getElementById('cvText').value = text;
+                statusDiv.className = 'file-status success';
+                statusDiv.innerHTML = `✅ File loaded successfully: ${file.name}`;
+            };
+            
+            reader.onerror = function() {
+                statusDiv.className = 'file-status error';
+                statusDiv.innerHTML = '❌ Error reading file. Please try again.';
+            };
+            
+            reader.readAsText(file);
+        }
+
+        // Analysis functions
+        function normalizeText(text) {
+            return text.toLowerCase().replace(/[^\w\s]/g, ' ').replace(/\s+/g, ' ').trim();
+        }
+
+        function extractKeywords(text) {
+            const normalized = normalizeText(text);
+            return normalized.split(' ').filter(word => word.length > 2 && !STOPWORDS.has(word));
+        }
+
         function analyzeCV() {
             const jobDesc = document.getElementById('jobDescription').value.trim();
             const cvText = document.getElementById('cvText').value.trim();
@@ -770,7 +736,7 @@
             btnText.textContent = '⏳ Analyzing Resume...';
 
             setTimeout(() => {
-                const result = performAdvancedAnalysis(jobDesc, cvText);
+                const result = performAnalysis(jobDesc, cvText);
                 displayResults(result);
                 
                 btn.disabled = false;
@@ -778,351 +744,46 @@
             }, 2000);
         }
 
-        function performAdvancedAnalysis(jobDesc, cvText) {
-            // Extract critical keywords from job description
-            const criticalKeywords = extractCriticalKeywords(jobDesc);
-            const jdHardSkills = extractJobRequiredSkills(jobDesc, HARD_SKILLS);
-            const jdSoftSkills = extractJobRequiredSkills(jobDesc, SOFT_SKILLS);
+        function performAnalysis(jobDesc, cvText) {
+            const jobKeywords = extractKeywords(jobDesc);
+            const cvKeywords = extractKeywords(cvText);
             
-            // Analyze resume against job requirements
-            const cvAnalysis = analyzeResumeAgainstJob(cvText, criticalKeywords, jdHardSkills, jdSoftSkills);
-            
-            // Calculate scores using professional ATS algorithms
-            const scores = calculateProfessionalScores(cvAnalysis, criticalKeywords.length, jdHardSkills.length, jdSoftSkills.length);
-            
-            // Identify critical issues
-            const criticalIssues = identifyIssues(jobDesc, cvText, cvAnalysis);
-            
-            return {
-                overallScore: scores.overall,
-                hardSkillsPercent: scores.hardSkills,
-                softSkillsPercent: scores.softSkills,
-                keywordsPercent: scores.keywords,
-                foundKeywords: cvAnalysis.foundKeywords.length,
-                missingKeywords: cvAnalysis.missingKeywords.length,
-                hardSkillsFound: cvAnalysis.hardSkillsFound,
-                hardSkillsMissing: cvAnalysis.hardSkillsMissing,
-                softSkillsFound: cvAnalysis.softSkillsFound,
-                softSkillsMissing: cvAnalysis.softSkillsMissing,
-                keywordMatches: cvAnalysis.foundKeywords,
-                keywordsMissing: cvAnalysis.missingKeywords,
-                criticalIssues: criticalIssues,
-                qualityScore: cvAnalysis.qualityScore
-            };
-        }
-
-        function extractCriticalKeywords(jobDesc) {
-            const text = normalizeText(jobDesc);
-            const sentences = jobDesc.split(/[.!?]+/);
-            const criticalKeywords = new Set();
-            
-            // Importance indicators
-            const importanceIndicators = [
-                'required', 'must have', 'essential', 'mandatory', 'necessary',
-                'minimum', 'at least', 'experience in', 'proficient in', 
-                'expert in', 'advanced', 'strong', 'excellent', 'proven',
-                'demonstrated', 'solid', 'extensive', 'deep', 'comprehensive'
-            ];
-            
-            sentences.forEach(sentence => {
-                const normalizedSentence = normalizeText(sentence);
-                
-                if (importanceIndicators.some(indicator => normalizedSentence.includes(indicator))) {
-                    const words = extractKeywords(sentence);
-                    words.forEach(word => {
-                        if (word.length > 3) {
-                            criticalKeywords.add(word);
-                        }
-                    });
-                }
-            });
-            
-            // Add frequently mentioned keywords
-            const allWords = extractKeywords(jobDesc);
-            const wordCount = {};
-            allWords.forEach(word => {
-                wordCount[word] = (wordCount[word] || 0) + 1;
-            });
-            
-            Object.entries(wordCount).forEach(([word, count]) => {
-                if (count >= 2 && word.length > 3) {
-                    criticalKeywords.add(word);
-                }
-            });
-            
-            return Array.from(criticalKeywords).slice(0, 40);
-        }
-
-        function extractJobRequiredSkills(jobDesc, skillsList) {
-            const requiredSkills = [];
-            const text = normalizeText(jobDesc);
-            
-            skillsList.forEach(skill => {
-                const normalizedSkill = normalizeText(skill);
-                
-                if (text.includes(normalizedSkill)) {
-                    requiredSkills.push(skill);
-                } else {
-                    const words = text.split(' ');
-                    if (words.some(word => fuzzyMatch(word, normalizedSkill, 0.90)) || 
-                        semanticSimilarity(skill, text)) {
-                        requiredSkills.push(skill);
-                    }
-                }
-            });
-            
-            return requiredSkills.slice(0, 20);
-        }
-
-        function analyzeResumeAgainstJob(cvText, criticalKeywords, requiredHardSkills, requiredSoftSkills) {
-            const cvNormalized = normalizeText(cvText);
-            const cvWords = extractKeywords(cvText);
-            
-            // Analyze critical keywords
             const foundKeywords = [];
             const missingKeywords = [];
             
-            criticalKeywords.forEach(keyword => {
-                let found = false;
-                
-                if (cvNormalized.includes(normalizeText(keyword))) {
-                    found = true;
-                } else if (cvWords.some(word => fuzzyMatch(word, normalizeText(keyword), 0.92))) {
-                    found = true;
-                }
-                
-                if (found) {
+            jobKeywords.forEach(keyword => {
+                if (cvKeywords.includes(keyword)) {
                     foundKeywords.push(keyword);
                 } else {
                     missingKeywords.push(keyword);
                 }
             });
+
+            const hardSkillsFound = HARD_SKILLS.filter(skill => 
+                normalizeText(cvText).includes(normalizeText(skill))
+            );
             
-            // Analyze hard skills
-            const hardSkillsFound = [];
-            const hardSkillsMissing = [];
-            
-            requiredHardSkills.forEach(skill => {
-                const normalizedSkill = normalizeText(skill);
-                let found = false;
-                
-                if (cvNormalized.includes(normalizedSkill)) {
-                    found = true;
-                } else if (cvWords.some(word => fuzzyMatch(word, normalizedSkill, 0.85)) ||
-                          semanticSimilarity(skill, cvText)) {
-                    found = true;
-                }
-                
-                if (found) {
-                    hardSkillsFound.push(skill);
-                } else {
-                    hardSkillsMissing.push(skill);
-                }
-            });
-            
-            // Analyze soft skills
-            const softSkillsFound = [];
-            const softSkillsMissing = [];
-            
-            requiredSoftSkills.forEach(skill => {
-                const normalizedSkill = normalizeText(skill);
-                
-                if (cvNormalized.includes(normalizedSkill) || 
-                    semanticSimilarity(skill, cvText)) {
-                    softSkillsFound.push(skill);
-                } else {
-                    softSkillsMissing.push(skill);
-                }
-            });
-            
-            const qualityScore = evaluateResumeQuality(cvText);
-            
+            const softSkillsFound = SOFT_SKILLS.filter(skill => 
+                normalizeText(cvText).includes(normalizeText(skill))
+            );
+
+            const keywordScore = jobKeywords.length > 0 ? Math.round((foundKeywords.length / jobKeywords.length) * 100) : 100;
+            const hardSkillsScore = Math.min(100, hardSkillsFound.length * 10);
+            const softSkillsScore = Math.min(100, softSkillsFound.length * 8);
+            const overallScore = Math.round((keywordScore * 0.5) + (hardSkillsScore * 0.3) + (softSkillsScore * 0.2));
+
             return {
-                foundKeywords,
-                missingKeywords,
+                overallScore,
+                keywordsPercent: keywordScore,
+                hardSkillsPercent: hardSkillsScore,
+                softSkillsPercent: softSkillsScore,
+                foundKeywords: foundKeywords.length,
+                missingKeywords: missingKeywords.length,
+                keywordMatches: foundKeywords.slice(0, 20),
+                keywordsMissing: missingKeywords.slice(0, 20),
                 hardSkillsFound,
-                hardSkillsMissing,
-                softSkillsFound,
-                softSkillsMissing,
-                qualityScore
+                softSkillsFound
             };
-        }
-
-        function calculateProfessionalScores(cvAnalysis, totalKeywords, totalHardSkills, totalSoftSkills) {
-            let keywordsPercent = 0;
-            if (totalKeywords > 0) {
-                keywordsPercent = Math.round((cvAnalysis.foundKeywords.length / totalKeywords) * 100);
-            }
-            
-            let hardSkillsPercent = 0;
-            if (totalHardSkills > 0) {
-                hardSkillsPercent = Math.round((cvAnalysis.hardSkillsFound.length / totalHardSkills) * 100);
-            } else {
-                hardSkillsPercent = 100;
-            }
-            
-            let softSkillsPercent = 0;
-            if (totalSoftSkills > 0) {
-                softSkillsPercent = Math.round((cvAnalysis.softSkillsFound.length / totalSoftSkills) * 100);
-            } else {
-                softSkillsPercent = 100;
-            }
-            
-            // Professional ATS scoring algorithm
-            let overall = Math.round(
-                (keywordsPercent * 0.45) +     // Keywords have highest weight
-                (hardSkillsPercent * 0.35) +   // Technical skills important
-                (softSkillsPercent * 0.15) +   // Soft skills moderate importance
-                (cvAnalysis.qualityScore * 0.05)  // Resume quality minor factor
-            );
-            
-            // Apply penalties for poor performance
-            if (cvAnalysis.foundKeywords.length === 0) overall = Math.min(overall, 15);
-            if (cvAnalysis.hardSkillsFound.length === 0 && totalHardSkills > 0) overall = Math.min(overall, 25);
-            if (overall > 90) overall = overall - Math.floor(Math.random() * 5) - 3; // Realistic cap
-            
-            return {
-                overall: Math.max(0, Math.min(100, overall)),
-                keywords: keywordsPercent,
-                hardSkills: hardSkillsPercent,
-                softSkills: softSkillsPercent
-            };
-        }
-
-        function evaluateResumeQuality(cvText) {
-            let score = 0;
-            const wordCount = cvText.trim().split(/\s+/).length;
-            
-            // Word count evaluation
-            if (wordCount >= 300 && wordCount <= 600) {
-                score += 25;
-            } else if (wordCount >= 200 && wordCount < 800) {
-                score += 15;
-            } else {
-                score -= 5;
-            }
-            
-            // Quantifiable results
-            const numbersPattern = /\d+(%|percent|years?|months?|\+|increase|decrease|improve|reduce|save|grow|million|thousand|k\b|\$)/gi;
-            const numbersCount = (cvText.match(numbersPattern) || []).length;
-            if (numbersCount >= 3) {
-                score += 30;
-            } else if (numbersCount >= 1) {
-                score += 20;
-            }
-            
-            // Action verbs
-            const strongVerbs = [
-                'achieved', 'accomplished', 'delivered', 'exceeded', 'improved', 
-                'increased', 'reduced', 'managed', 'led', 'created', 'developed',
-                'implemented', 'optimized', 'streamlined', 'generated', 'built',
-                'launched', 'designed', 'coordinated', 'supervised'
-            ];
-            const verbsFound = strongVerbs.filter(verb => 
-                cvText.toLowerCase().includes(verb)
-            ).length;
-            
-            if (verbsFound >= 5) {
-                score += 25;
-            } else if (verbsFound >= 2) {
-                score += 15;
-            }
-            
-            // Resume sections
-            const sections = ['experience', 'education', 'skills', 'summary', 'objective'];
-            const sectionsFound = sections.filter(section => 
-                cvText.toLowerCase().includes(section)
-            ).length;
-            
-            if (sectionsFound >= 3) {
-                score += 20;
-            } else if (sectionsFound >= 2) {
-                score += 10;
-            }
-            
-            return Math.max(0, Math.min(100, score));
-        }
-
-        function identifyIssues(jobDesc, cvText, cvAnalysis) {
-            const issues = [];
-            
-            if (cvAnalysis.foundKeywords.length === 0) {
-                issues.push('❌ No critical keywords from job description found in resume');
-            }
-            
-            if (cvAnalysis.hardSkillsFound.length === 0 && cvAnalysis.hardSkillsMissing.length > 0) {
-                issues.push('⚠️ Missing all required technical skills');
-            }
-            
-            const wordCount = cvText.trim().split(/\s+/).length;
-            if (wordCount < 250) {
-                issues.push('📝 Resume is too short - add more relevant details');
-            }
-            
-            if (!/\d/.test(cvText)) {
-                issues.push('📊 No quantifiable achievements or metrics found');
-            }
-            
-            const weakPhrases = ['responsible for', 'duties include', 'helped with', 'worked on'];
-            const weakPhrasesFound = weakPhrases.filter(phrase => 
-                cvText.toLowerCase().includes(phrase)
-            );
-            if (weakPhrasesFound.length > 0) {
-                issues.push(`💪 Replace weak phrases: ${weakPhrasesFound.join(', ')}`);
-            }
-            
-            return issues;
-        }
-
-        function generateTips(result) {
-            const tips = [];
-            
-            // Score-based recommendations
-            if (result.overallScore < 30) {
-                tips.push('🚨 Critical: Resume needs complete rewrite to match job requirements');
-            } else if (result.overallScore < 50) {
-                tips.push('⚠️ Major improvements needed to pass ATS systems');
-            } else if (result.overallScore < 70) {
-                tips.push('📈 Good foundation but needs optimization for better ATS compatibility');
-            } else if (result.overallScore >= 85) {
-                tips.push('🎉 Excellent! Resume is well-optimized for ATS systems');
-            }
-            
-            // Critical issues
-            if (result.criticalIssues && result.criticalIssues.length > 0) {
-                tips.push('⛔ Critical issues to address:');
-                result.criticalIssues.forEach(issue => tips.push(issue));
-            }
-            
-            // Specific improvements
-            if (result.hardSkillsPercent < 40) {
-                tips.push('💻 Priority: Add more technical skills mentioned in job description');
-                if (result.hardSkillsMissing && result.hardSkillsMissing.length > 0) {
-                    tips.push(`🔧 Focus on: ${result.hardSkillsMissing.slice(0, 3).join(', ')}`);
-                }
-            }
-            
-            if (result.keywordsPercent < 50) {
-                tips.push('🔑 Use more keywords from the job description throughout your resume');
-                tips.push('📝 Mirror the exact terminology used in the job posting');
-            }
-            
-            if (result.softSkillsPercent < 60 && result.softSkillsMissing && result.softSkillsMissing.length > 0) {
-                tips.push(`🤝 Demonstrate these soft skills: ${result.softSkillsMissing.slice(0, 2).join(', ')}`);
-            }
-            
-            // Professional tips
-            tips.push('📊 Add specific metrics and achievements (increased sales by 25%, managed team of 10)');
-            tips.push('💪 Use strong action verbs: achieved, optimized, delivered, exceeded');
-            tips.push('🎯 Customize your resume for each job application');
-            tips.push('📋 Ensure clear sections: Summary, Experience, Skills, Education');
-            
-            if (result.overallScore >= 70) {
-                tips.push('🔍 Review job description multiple times to catch subtle requirements');
-                tips.push('🎪 Use synonyms for key skills to avoid keyword stuffing');
-            }
-            
-            return tips.slice(0, 12);
         }
 
         function displayResults(result) {
@@ -1132,7 +793,6 @@
             document.getElementById('missingKeywords').textContent = result.missingKeywords;
             document.getElementById('matchPercentage').textContent = result.overallScore + '%';
             
-            // Animate progress bars
             setTimeout(() => updateProgressBar('hardSkillsProgress', 'hardSkillsPercent', result.hardSkillsPercent), 300);
             setTimeout(() => updateProgressBar('softSkillsProgress', 'softSkillsPercent', result.softSkillsPercent), 600);
             setTimeout(() => updateProgressBar('keywordsProgress', 'keywordsPercent', result.keywordsPercent), 900);
@@ -1160,177 +820,92 @@
             
             progressBar.style.width = value + '%';
             percentLabel.textContent = value + '%';
-            
-            // Color coding
-            if (value >= 80) progressBar.style.background = 'linear-gradient(90deg, #27ae60, #2ecc71)';
-            else if (value >= 60) progressBar.style.background = 'linear-gradient(90deg, #f39c12, #f1c40f)';
-            else if (value >= 40) progressBar.style.background = 'linear-gradient(90deg, #e67e22, #f39c12)';
-            else progressBar.style.background = 'linear-gradient(90deg, #e74c3c, #c0392b)';
         }
 
         function updateTabContent(result) {
-            // Summary tab
-            const scoreClass = result.overallScore >= 70 ? 'alert-success' : 
-                              result.overallScore >= 50 ? 'alert-warning' : 'alert-danger';
-            
             const scoreMessage = result.overallScore >= 70 ? 'Excellent - Will pass ATS screening' :
-                                result.overallScore >= 50 ? 'Good - Needs minor improvements' : 
+                                result.overallScore >= 50 ? 'Good - Needs improvements' : 
                                 'Poor - Requires major revisions';
 
             document.getElementById('summary').innerHTML = `
-                <h3>📋 Comprehensive Analysis Summary</h3>
-                <div class="alert-box ${scoreClass}">
-                    <h4>Overall Score: ${result.overallScore}% - ${scoreMessage}</h4>
-                </div>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0;">
-                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
-                        <strong>Keywords Match:</strong><br>
-                        ${result.keywordsPercent}% (${result.foundKeywords}/${result.foundKeywords + result.missingKeywords} found)
-                    </div>
-                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
-                        <strong>Technical Skills:</strong><br>
-                        ${result.hardSkillsPercent}% (${result.hardSkillsFound.length}/${result.hardSkillsFound.length + result.hardSkillsMissing.length} matched)
-                    </div>
-                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
-                        <strong>Soft Skills:</strong><br>
-                        ${result.softSkillsPercent}% (${result.softSkillsFound.length}/${result.softSkillsFound.length + result.softSkillsMissing.length} matched)
-                    </div>
-                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
-                        <strong>Resume Quality:</strong><br>
-                        ${result.qualityScore || 0}% (Structure & Content)
-                    </div>
-                </div>
-                
-                ${result.criticalIssues && result.criticalIssues.length > 0 ? 
-                    `<div class="alert-box alert-danger">
-                        <h4>🚨 Critical Issues Identified:</h4>
-                        ${result.criticalIssues.map(issue => `<p style="margin: 6px 0;">• ${issue}</p>`).join('')}
-                    </div>` : ''
-                }
-                
-                <p style="font-size: 14px; color: #666; margin-top: 20px; padding: 10px; background: #f8f9fa; border-radius: 6px;">
-                    💡 <strong>Professional ATS Analysis:</strong> This analysis uses algorithms similar to major ATS systems 
-                    used by Fortune 500 companies and recruiting platforms.
-                </p>
+                <h3>📋 Analysis Summary</h3>
+                <p><strong>Overall Score: ${result.overallScore}% - ${scoreMessage}</strong></p>
+                <p>Keywords Match: ${result.keywordsPercent}% (${result.foundKeywords}/${result.foundKeywords + result.missingKeywords})</p>
+                <p>Technical Skills: ${result.hardSkillsPercent}% (${result.hardSkillsFound.length} found)</p>
+                <p>Soft Skills: ${result.softSkillsPercent}% (${result.softSkillsFound.length} found)</p>
             `;
 
-            // Hard Skills tab
             document.getElementById('hardSkillsContent').innerHTML = `
-                <div style="margin-bottom: 20px;">
-                    <h4 style="color: #27ae60;">✅ Technical Skills Found (${result.hardSkillsFound.length})</h4>
-                    <div style="margin: 10px 0;">
-                        ${result.hardSkillsFound.length > 0 ? 
-                            result.hardSkillsFound.map(skill => `<span class="skill-item found">${skill}</span>`).join('') :
-                            '<p style="color: #666; font-style: italic;">No matching technical skills found</p>'
-                        }
-                    </div>
-                </div>
-                
-                <div>
-                    <h4 style="color: #e74c3c;">❌ Technical Skills Missing (${result.hardSkillsMissing.length})</h4>
-                    <div style="margin: 10px 0;">
-                        ${result.hardSkillsMissing.length > 0 ? 
-                            result.hardSkillsMissing.map(skill => `<span class="skill-item missing">${skill}</span>`).join('') :
-                            '<p style="color: #27ae60; font-style: italic;">All required technical skills are present!</p>'
-                        }
-                    </div>
-                </div>
-                
-                ${result.hardSkillsMissing.length > 0 ? 
-                    `<div class="alert-box alert-warning" style="margin-top: 15px;">
-                        <strong>💡 Recommendation:</strong> Consider adding the missing skills if you have experience with them, 
-                        or prioritize learning the most critical ones for this role.
-                    </div>` : ''
-                }
+                <h4>✅ Found: ${result.hardSkillsFound.join(', ') || 'None'}</h4>
+                <p>Focus on adding more technical skills relevant to the job.</p>
             `;
 
-            // Soft Skills tab
             document.getElementById('softSkillsContent').innerHTML = `
-                <div style="margin-bottom: 20px;">
-                    <h4 style="color: #27ae60;">✅ Soft Skills Found (${result.softSkillsFound.length})</h4>
-                    <div style="margin: 10px 0;">
-                        ${result.softSkillsFound.length > 0 ? 
-                            result.softSkillsFound.map(skill => `<span class="skill-item found">${skill}</span>`).join('') :
-                            '<p style="color: #666; font-style: italic;">No matching soft skills found</p>'
-                        }
-                    </div>
-                </div>
-                
-                <div>
-                    <h4 style="color: #e74c3c;">❌ Soft Skills Missing (${result.softSkillsMissing.length})</h4>
-                    <div style="margin: 10px 0;">
-                        ${result.softSkillsMissing.length > 0 ? 
-                            result.softSkillsMissing.map(skill => `<span class="skill-item missing">${skill}</span>`).join('') :
-                            '<p style="color: #27ae60; font-style: italic;">All required soft skills are demonstrated!</p>'
-                        }
-                    </div>
-                </div>
-                
-                ${result.softSkillsMissing.length > 0 ? 
-                    `<div class="alert-box alert-warning" style="margin-top: 15px;">
-                        <strong>💡 Recommendation:</strong> Add specific examples that demonstrate these soft skills 
-                        in your work experience descriptions.
-                    </div>` : ''
-                }
+                <h4>✅ Found: ${result.softSkillsFound.join(', ') || 'None'}</h4>
+                <p>Consider demonstrating more soft skills in your experience descriptions.</p>
             `;
 
-            // Keywords tab
             document.getElementById('keywordsContent').innerHTML = `
-                <div style="margin-bottom: 20px;">
-                    <h4 style="color: #27ae60;">✅ Critical Keywords Found (${result.keywordMatches.length})</h4>
-                    <div style="max-height: 200px; overflow-y: auto; margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 6px;">
-                        ${result.keywordMatches.length > 0 ? 
-                            result.keywordMatches.slice(0, 100).map(keyword => `<span class="skill-item found">${keyword}</span>`).join('') :
-                            '<p style="color: #666; font-style: italic;">No critical keywords found</p>'
-                        }
-                    </div>
-                </div>
-                
-                <div>
-                    <h4 style="color: #e74c3c;">❌ Critical Keywords Missing (${result.keywordsMissing.length})</h4>
-                    <div style="max-height: 200px; overflow-y: auto; margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 6px;">
-                        ${result.keywordsMissing.length > 0 ? 
-                            result.keywordsMissing.slice(0, 100).map(keyword => `<span class="skill-item missing">${keyword}</span>`).join('') :
-                            '<p style="color: #27ae60; font-style: italic;">All critical keywords are present!</p>'
-                        }
-                    </div>
-                </div>
-                
-                <div class="alert-box alert-warning" style="margin-top: 15px;">
-                    <strong>🎯 Pro Tip:</strong> Use the exact keywords from the job description. 
-                    ATS systems look for precise matches, so "data analysis" and "data analytics" might be treated differently.
-                </div>
+                <h4 style="color: #27ae60;">✅ Found Keywords:</h4>
+                <p>${result.keywordMatches.join(', ') || 'None found'}</p>
+                <h4 style="color: #e74c3c;">❌ Missing Keywords:</h4>
+                <p>${result.keywordsMissing.join(', ') || 'All keywords present'}</p>
             `;
 
-            // Tips tab
             const tips = generateTips(result);
             document.getElementById('tipsList').innerHTML = tips.map((tip, index) => 
                 `<li><strong>${index + 1}.</strong> ${tip}</li>`
             ).join('');
         }
 
+        function generateTips(result) {
+            const tips = [];
+            
+            if (result.overallScore < 30) {
+                tips.push('🚨 Critical: Resume needs complete rewrite to match job requirements');
+            } else if (result.overallScore < 50) {
+                tips.push('⚠️ Major improvements needed to pass ATS systems');
+            } else if (result.overallScore < 70) {
+                tips.push('📈 Good foundation but needs optimization for better ATS compatibility');
+            } else {
+                tips.push('🎉 Excellent! Resume is well-optimized for ATS systems');
+            }
+            
+            if (result.keywordsPercent < 50) {
+                tips.push('🔑 Use more keywords from the job description throughout your resume');
+                tips.push('📝 Mirror the exact terminology used in the job posting');
+            }
+            
+            if (result.hardSkillsFound.length < 3) {
+                tips.push('💻 Add more technical skills mentioned in job description');
+            }
+            
+            if (result.softSkillsFound.length < 3) {
+                tips.push('🤝 Demonstrate more soft skills with specific examples');
+            }
+            
+            tips.push('📊 Add specific metrics and achievements (increased sales by 25%, managed team of 10)');
+            tips.push('💪 Use strong action verbs: achieved, optimized, delivered, exceeded');
+            tips.push('🎯 Customize your resume for each job application');
+            
+            return tips;
+        }
+
         function showTab(tabName) {
-            // Hide all tabs
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.remove('active');
             });
             
-            // Remove active class from buttons
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
             
-            // Show selected tab
             document.getElementById(tabName).classList.add('active');
-            
-            // Add active class to clicked button
             event.target.classList.add('active');
         }
 
         // Initialize application
         document.addEventListener('DOMContentLoaded', function() {
-            // Add focus effects to textareas
             const textareas = document.querySelectorAll('textarea');
             textareas.forEach(textarea => {
                 textarea.addEventListener('focus', function() {
@@ -1341,6 +916,32 @@
                 textarea.addEventListener('blur', function() {
                     this.style.borderColor = '#e1e5e9';
                     this.style.boxShadow = 'none';
+                });
+            });
+
+            // Setup drag and drop
+            const uploadAreas = document.querySelectorAll('.file-upload-area');
+            uploadAreas.forEach(area => {
+                area.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    area.classList.add('dragover');
+                });
+                
+                area.addEventListener('dragleave', (e) => {
+                    e.preventDefault();
+                    area.classList.remove('dragover');
+                });
+                
+                area.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    area.classList.remove('dragover');
+                    
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        const fileInput = area.querySelector('.file-input');
+                        fileInput.files = files;
+                        fileInput.dispatchEvent(new Event('change'));
+                    }
                 });
             });
         });
